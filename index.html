@@ -4,10 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Minders Pay</title>
+
+    <script src="https://cdn.amplitude.com/script/84ace0d2f36082f53ba6988af698a0b6.js"></script>
+    <script>
+      window.amplitude.init('84ace0d2f36082f53ba6988af698a0b6', {
+        fetchRemoteConfig: true,
+        autocapture: true
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
