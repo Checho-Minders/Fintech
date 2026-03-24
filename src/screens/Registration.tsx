@@ -1,6 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Screen } from '../types';
 import { useUser } from '../context/UserContext';
+import {
+  trackPhoneSubmitted,
+  trackPersonalDataSubmitted,
+  trackKycDocumentViewed,
+  trackKycDocumentUploaded,
+  trackKycSelfieViewed,
+  trackKycSelfieUploaded,
+  trackKycValidationStarted,
+  trackKycValidationResult,
+  trackPinCreated,
+  trackOnboardingCompleted,
+  trackOnboardingCtaClicked,
+  setAmplitudeUserId,
+} from '../utils/amplitude';
 
 export function RegisterPhoneScreen({ navigate }: { navigate: (s: Screen) => void }) {
   const [phone, setPhone] = useState('');
@@ -9,6 +23,7 @@ export function RegisterPhoneScreen({ navigate }: { navigate: (s: Screen) => voi
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault();
     updateUser({ phone: `+54 9 ${phone}` });
+    trackPhoneSubmitted('+54 9');
     navigate('register_data');
   };
 
@@ -75,6 +90,7 @@ export function RegisterDataScreen({ navigate }: { navigate: (s: Screen) => void
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault();
     updateUser(formData);
+    trackPersonalDataSubmitted(!!formData.email, !!formData.dni);
     navigate('kyc_doc');
   };
 
@@ -158,6 +174,10 @@ export function RegisterDataScreen({ navigate }: { navigate: (s: Screen) => void
 }
 
 export function KycDocScreen({ navigate }: { navigate: (s: Screen) => void }) {
+  useEffect(() => {
+    trackKycDocumentViewed();
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-brand-bg overflow-hidden">
       <main className="flex-1 flex items-center justify-center p-6 md:p-12 relative z-10">
@@ -177,7 +197,7 @@ export function KycDocScreen({ navigate }: { navigate: (s: Screen) => void }) {
             </div>
           </div>
           
-          <button onClick={() => navigate('kyc_selfie')} className="w-full h-11 bg-brand-orange hover:bg-orange-600 text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2">
+          <button onClick={() => { trackKycDocumentUploaded('front'); navigate('kyc_selfie'); }} className="w-full h-11 bg-brand-orange hover:bg-orange-600 text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2">
             Continuar
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
           </button>
@@ -188,6 +208,10 @@ export function KycDocScreen({ navigate }: { navigate: (s: Screen) => void }) {
 }
 
 export function KycSelfieScreen({ navigate }: { navigate: (s: Screen) => void }) {
+  useEffect(() => {
+    trackKycSelfieViewed();
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-brand-bg overflow-hidden">
       <main className="flex-1 flex items-center justify-center p-6 md:p-12 relative z-10">
@@ -207,7 +231,7 @@ export function KycSelfieScreen({ navigate }: { navigate: (s: Screen) => void })
             </div>
           </div>
           
-          <button onClick={() => navigate('kyc_review')} className="w-full h-11 bg-brand-orange hover:bg-orange-600 text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2">
+          <button onClick={() => { trackKycSelfieUploaded(); navigate('kyc_review'); }} className="w-full h-11 bg-brand-orange hover:bg-orange-600 text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2">
             Continuar
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
           </button>
@@ -218,6 +242,10 @@ export function KycSelfieScreen({ navigate }: { navigate: (s: Screen) => void })
 }
 
 export function KycReviewScreen({ navigate }: { navigate: (s: Screen) => void }) {
+  useEffect(() => {
+    trackKycValidationStarted();
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-brand-bg overflow-hidden">
       <main className="flex-1 flex items-center justify-center p-6 md:p-12 relative z-10">
@@ -246,7 +274,7 @@ export function KycReviewScreen({ navigate }: { navigate: (s: Screen) => void })
             </div>
           </div>
           
-          <button onClick={() => navigate('pin_create')} className="w-full mt-12 h-11 bg-brand-card hover:bg-brand-border border border-brand-border text-white rounded-xl font-semibold text-sm transition-all">
+          <button onClick={() => { trackKycValidationResult('success'); navigate('pin_create'); }} className="w-full mt-12 h-11 bg-brand-card hover:bg-brand-border border border-brand-border text-white rounded-xl font-semibold text-sm transition-all">
             Simular validación exitosa
           </button>
         </div>
@@ -296,7 +324,7 @@ export function PinCreateScreen({ navigate }: { navigate: (s: Screen) => void })
           </div>
           
           <button 
-            onClick={() => navigate('welcome')} 
+            onClick={() => { trackPinCreated(); navigate('welcome'); }} 
             disabled={pin.length < 4}
             className="w-full h-11 bg-brand-orange hover:bg-orange-600 disabled:bg-brand-card disabled:text-brand-gray disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
           >
@@ -311,6 +339,14 @@ export function PinCreateScreen({ navigate }: { navigate: (s: Screen) => void })
 
 export function WelcomeScreen({ navigate }: { navigate: (s: Screen) => void }) {
   const { user } = useUser();
+
+  useEffect(() => {
+    // Setear userId con el celular del usuario (o email si preferís)
+    if (user.phone) {
+      setAmplitudeUserId(`user_${user.phone.replace(/\s+/g, '')}`);
+    }
+    trackOnboardingCompleted();
+  }, []);
   
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-brand-bg relative overflow-hidden">
@@ -327,7 +363,7 @@ export function WelcomeScreen({ navigate }: { navigate: (s: Screen) => void }) {
         <h1 className="text-4xl font-bold text-white tracking-tight mb-4">¡Hola, {user.firstName}!</h1>
         <p className="text-brand-gray text-lg mb-12">Tu cuenta de Minders Pay está lista para usar. Comienza a disfrutar de todas las ventajas de tu nueva billetera.</p>
         
-        <button onClick={() => navigate('dashboard')} className="w-full h-14 bg-brand-orange hover:bg-orange-600 text-white rounded-xl font-bold text-base transition-all shadow-lg shadow-brand-orange/20">
+        <button onClick={() => { trackOnboardingCtaClicked(); navigate('dashboard'); }} className="w-full h-14 bg-brand-orange hover:bg-orange-600 text-white rounded-xl font-bold text-base transition-all shadow-lg shadow-brand-orange/20">
           Ir a mi cuenta
         </button>
       </div>
