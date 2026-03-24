@@ -5,11 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Minders Pay</title>
 
+    <!-- Amplitude SDK Unificado (Analytics + Session Replay) -->
     <script src="https://cdn.amplitude.com/script/84ace0d2f36082f53ba6988af698a0b6.js"></script>
+
+    <!-- Amplitude Guides & Surveys -->
+    <script src="https://cdn.amplitude.com/script/84ace0d2f36082f53ba6988af698a0b6.engagement.js"></script>
+
     <script>
+      // Session Replay
+      window.amplitude.add(window.sessionReplay.plugin({
+        sampleRate: 1,
+        forceSessionTracking: true
+      }));
+
+      // Guides & Surveys
+      window.amplitude.add(window.engagement.plugin());
+
+      // Inicialización con Autocapture completo
       window.amplitude.init('84ace0d2f36082f53ba6988af698a0b6', {
         fetchRemoteConfig: true,
-        autocapture: true
+        autocapture: {
+          attribution: true,
+          fileDownloads: true,
+          formInteractions: true,
+          pageViews: true,
+          sessions: true,
+          elementInteractions: true,
+          networkTracking: true,
+          webVitals: true,
+          frustrationInteractions: true
+        }
       });
     </script>
     <script type="module" crossorigin src="/Fintech/assets/index-CG3kJd0-.js"></script>
