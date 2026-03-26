@@ -1,12 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Screen } from '../types';
 import { Camera, CheckCircle, Shield, Key, Smartphone, LogOut, Trash2, ChevronRight, Edit3, Mail, Phone, User, X, Check } from 'lucide-react';
 import { useUser } from '../context/UserContext';
+import { trackProfileViewed } from '../utils/amplitude';
 
 export function ProfileScreen({ navigate }: { navigate: (s: Screen) => void }) {
   const { user, updateUser, getInitials, getFullName } = useUser();
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState('');
+  const hasTracked = useRef(false);
+
+  // ── Activation: track profile viewed ──
+  useEffect(() => {
+    if (!hasTracked.current) {
+      trackProfileViewed();
+      hasTracked.current = true;
+    }
+  }, []);
 
   const handleEdit = (field: string, value: string) => {
     setEditingField(field);
