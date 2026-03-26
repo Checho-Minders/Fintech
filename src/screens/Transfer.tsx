@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Screen, TransferData } from '../types';
 import { Plus, X, Check } from 'lucide-react';
 import { useMovements } from '../context/MovementsContext';
 import { formatUSD } from '../utils/format';
+import {
+  trackTransferStarted,
+  trackTransferRecipientFilled,
+  trackTransferConfirmed,
+} from '../utils/amplitude';
 
 export function TransferScreen({ navigate }: { navigate: (s: Screen, d?: TransferData) => void }) {
   const [amount, setAmount] = useState('');
@@ -11,6 +16,8 @@ export function TransferScreen({ navigate }: { navigate: (s: Screen, d?: Transfe
   const [newContactName, setNewContactName] = useState('');
   const [newContactPhone, setNewContactPhone] = useState('');
   const { balance } = useMovements();
+  const hasTrackedMount = useRef(false);
+  const hasTrackedRecipient = useRef(false);
   const [contacts, setContacts] = useState([
     { name: 'Carlos M.', initials: 'CM', color: 'bg-blue-500' },
     { name: 'Ana Lopez', initials: 'AL', color: 'bg-purple-500' },
@@ -18,9 +25,31 @@ export function TransferScreen({ navigate }: { navigate: (s: Screen, d?: Transfe
     { name: 'Mamá', initials: 'MA', color: 'bg-pink-500' },
   ]);
 
+  // ── Activation: track transfer flow started ──
+  useEffect(() => {
+    if (!hasTrackedMount.current) {
+      trackTransferStarted();
+      hasTrackedMount.current = true;
+    }
+  }, []);
+
+  // ── Activation: track recipient filled (once, when recipient has value) ──
+  const handleSelectContact = (contactName: string) => {
+    setRecipient(contactName);
+    if (!hasTrackedRecipient.current) {
+      trackTransferRecipientFilled('contact_selected');
+      hasTrackedRecipient.current = true;
+    }
+  };
+
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault();
     if (amount && recipient) {
+      // Track recipient filled if it was typed manually and not yet tracked
+      if (!hasTrackedRecipient.current) {
+        trackTransferRecipientFilled('manual_input');
+        hasTrackedRecipient.current = true;
+      }
       navigate('transfer_confirm', { amount, recipient });
     }
   };
@@ -33,6 +62,10 @@ export function TransferScreen({ navigate }: { navigate: (s: Screen, d?: Transfe
         color: 'bg-gray-500' 
       }]);
       setRecipient(newContactName);
+      if (!hasTrackedRecipient.current) {
+        trackTransferRecipientFilled('contact_selected');
+        hasTrackedRecipient.current = true;
+      }
       setNewContactName('');
       setNewContactPhone('');
       setShowModal(false);
@@ -111,7 +144,7 @@ export function TransferScreen({ navigate }: { navigate: (s: Screen, d?: Transfe
                 <button 
                   key={i} 
                   type="button"
-                  onClick={() => setRecipient(contact.name)}
+                  onClick={() => handleSelectContact(contact.name)}
                   className="flex flex-col items-center gap-2 min-w-[72px] group"
                 >
                   <div className={`w-14 h-14 rounded-full ${contact.color} flex items-center justify-center text-white font-bold text-lg border-2 border-transparent group-hover:border-white transition-all shadow-lg`}>
@@ -153,6 +186,20 @@ export function TransferScreen({ navigate }: { navigate: (s: Screen, d?: Transfe
 }
 
 export function TransferConfirmScreen({ navigate, data }: { navigate: (s: Screen, d?: TransferData) => void, data?: TransferData }) {
+
+  // ── Activation: track transfer confirmed on CTA click ──
+  const handleConfirm = () => {
+    trackTransferConfirmed(
+      Number(data?.amount || 0),
+      data?.recipient || 'Destinatario'
+    );
+    navigate('operation_success', {
+      amount: data?.amount || '0',
+      recipient: data?.recipient || 'Destinatario',
+      successType: 'transfer',
+    });
+  };
+
   return (
     <div className="max-w-[500px] mx-auto">
       <nav className="mb-8">
@@ -190,7 +237,7 @@ export function TransferConfirmScreen({ navigate, data }: { navigate: (s: Screen
         </div>
       </div>
 
-      <button onClick={() => navigate('operation_success', { amount: data?.amount || '0', recipient: data?.recipient || 'Destinatario', successType: 'transfer' })} className="w-full h-14 bg-brand-orange hover:bg-orange-600 text-white rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-orange/20">
+      <button onClick={handleConfirm} className="w-full h-14 bg-brand-orange hover:bg-orange-600 text-white rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-orange/20">
         Confirmar y enviar
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
       </button>
