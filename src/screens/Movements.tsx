@@ -1,13 +1,23 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Screen, Movement } from '../types';
 import { useMovements } from '../context/MovementsContext';
 import { formatUSD } from '../utils/format';
+import { trackMovementsViewed } from '../utils/amplitude';
 
 export function MovementsScreen({ navigate }: { navigate: (s: Screen) => void }) {
   const { transactions } = useMovements();
   const ingresos = transactions.filter(m => m.type === 'transfer_in').reduce((acc, m) => acc + m.amount, 0);
   const egresos = transactions.filter(m => m.type === 'transfer_out' || m.type === 'purchase').reduce((acc, m) => acc + m.amount, 0);
   const balance = ingresos - egresos;
+  const hasTracked = useRef(false);
+
+  // ── Activation: track movements viewed ──
+  useEffect(() => {
+    if (!hasTracked.current) {
+      trackMovementsViewed();
+      hasTracked.current = true;
+    }
+  }, []);
 
   return (
     <div className="max-w-[1200px] mx-auto">
