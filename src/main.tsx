@@ -1,9 +1,13 @@
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
 import { initAmplitude, fetchFeatureVariants } from './utils/amplitude';
 
 // Inicializar Amplitude
 initAmplitude();
 
-// Cargar los valores de los feature flags ANTES de montar la app
+// Cargar los feature flags ANTES de montar la app
 fetchFeatureVariants().then(() => {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
