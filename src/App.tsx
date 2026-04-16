@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Screen, TransferData } from './types';
 import { MovementsProvider, useMovements } from './context/MovementsContext';
 import { UserProvider } from './context/UserContext';
@@ -53,12 +53,61 @@ import { ProfileScreen } from './screens/Profile';
 import { PayServicesScreen } from './screens/PayServices';
 import { DashboardLayout } from './components/Layout';
 
+// --- Hash Routing Helpers ---
+
+const VALID_SCREENS: Screen[] = [
+  'login', 'register_phone', 'register_data', 'kyc_doc', 'kyc_selfie',
+  'kyc_review', 'pin_create', 'welcome', 'dashboard', 'movements',
+  'transaction_detail', 'finance', 'topup_channel', 'topup_instructions',
+  'topup_cash', 'topup_success', 'notifications', 'transfer',
+  'transfer_confirm', 'operation_success', 'products', 'market',
+  'market_hub', 'cdt_digital', 'daily_yield', 'investment_hub', 'cards',
+  'card_manage', 'card_pin', 'card_detail', 'charge_qr', 'mobile_topup',
+  'sales_stats', 'create_payment_link', 'business_dashboard',
+  'insurance_detail', 'insurance_wizard', 'insurance_hub', 'credit_sign',
+  'credit_offer', 'pocket_detail', 'create_pocket', 'savings_hub',
+  'referrals', 'benefits', 'ai_support', 'security', 'catalog', 'profile',
+  'pay_services',
+];
+
+/** Read current screen from the URL hash, e.g. #/dashboard -> 'dashboard' */
+function getScreenFromHash(): Screen {
+  const hash = window.location.hash.replace(/^#\/?/, '');
+  if (hash && VALID_SCREENS.includes(hash as Screen)) {
+    return hash as Screen;
+  }
+  return 'login';
+}
+
+/** Write a screen name into the URL hash */
+function setHash(screen: Screen) {
+  const newHash = `#/${screen}`;
+  if (window.location.hash !== newHash) {
+    window.location.hash = newHash;
+  }
+}
+
 function MainContent() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('login');
+  const [currentScreen, setCurrentScreen] = useState<Screen>(getScreenFromHash);
   const [transferData, setTransferData] = useState<TransferData | undefined>();
   const { addTransaction, updateBalance } = useMovements();
 
-  const navigate = (screen: Screen, data?: TransferData) => {
+  // Listen for browser back / forward buttons
+  useEffect(() => {
+    const onHashChange = () => {
+      const screen = getScreenFromHash();
+      setCurrentScreen(screen);
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  // Keep hash in sync when screen changes programmatically
+  useEffect(() => {
+    setHash(currentScreen);
+  }, [currentScreen]);
+
+  const navigate = useCallback((screen: Screen, data?: TransferData) => {
     if (!data) {
       setTransferData(undefined);
     }
@@ -84,7 +133,7 @@ function MainContent() {
       }
     }
     setCurrentScreen(screen);
-  };
+  }, [addTransaction, updateBalance]);
 
   const renderScreen = () => {
     switch (currentScreen) {
