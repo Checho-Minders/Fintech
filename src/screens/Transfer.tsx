@@ -19,10 +19,12 @@ export function TransferScreen({ navigate }: { navigate: (s: Screen, d?: Transfe
   const hasTrackedMount = useRef(false);
   const hasTrackedRecipient = useRef(false);
   const [contacts, setContacts] = useState([
-    { name: 'Carlos M.', initials: 'CM', color: 'bg-blue-500' },
-    { name: 'Ana Lopez', initials: 'AL', color: 'bg-purple-500' },
-    { name: 'Alquiler', initials: 'AL', color: 'bg-green-500' },
-    { name: 'Mamá', initials: 'MA', color: 'bg-pink-500' },
+    { name: 'Mamá.', initials: 'MA', color: 'bg-blue-500' },
+    { name: 'Papá', initials: 'PA', color: 'bg-purple-500' },
+    { name: 'Abuela', initials: 'AB', color: 'bg-green-500' },
+    { name: 'Hijo', initials: 'HI', color: 'bg-pink-500' },
+    { name: 'Alquiler', initials: 'AL', color: 'bg-oranje-500' },
+    { name: 'Novi@', initials: 'NO', color: 'bg-red-500' },
   ]);
 
   // ── Activation: track transfer flow started ──
