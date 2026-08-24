@@ -5,41 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Minders Pay</title>
 
-    <!-- ✅ NUEVO: Web Experiment Script (debe ir PRIMERO para evitar parpadeo) -->
-    <script src="https://cdn.amplitude.com/script/cd5f1f0c8671ef6e683ff483bdac772f.experiment.js"></script>
-
-    <!-- Amplitude SDK Unificado (Analytics + Session Replay) -->
-    <script src="https://cdn.amplitude.com/script/cd5f1f0c8671ef6e683ff483bdac772f.js"></script>
+    <!--
+      Amplitude Unified Script: Analytics + Session Replay + Web Experiment.
+      No cargar un .experiment.js adicional: Web Experiment ya viene incluido.
+    -->
+    <script src="https://cdn.amplitude.com/script/84ace0d2f36082f53ba6988af698a0b6.js"></script>
 
     <!-- Amplitude Guides & Surveys -->
-    <script src="https://cdn.amplitude.com/script/cd5f1f0c8671ef6e683ff483bdac772f.engagement.js"></script>
+    <script src="https://cdn.amplitude.com/script/84ace0d2f36082f53ba6988af698a0b6.engagement.js"></script>
 
-    <script>
-      // Session Replay
-      window.amplitude.add(window.sessionReplay.plugin({
-        sampleRate: 1,
-        forceSessionTracking: true
-      }));
-
-      // Guides & Surveys
-      window.amplitude.add(window.engagement.plugin());
-
-      // Inicialización con Autocapture completo
-      window.amplitude.init('cd5f1f0c8671ef6e683ff483bdac772f', {
-        fetchRemoteConfig: true,
-        autocapture: {
-          attribution: true,
-          fileDownloads: true,
-          formInteractions: true,
-          pageViews: true,
-          sessions: true,
-          elementInteractions: true,
-          networkTracking: true,
-          webVitals: true,
-          frustrationInteractions: true
-        }
-      });
-    </script>
+    <!--
+      La inicialización de Amplitude vive únicamente en src/utils/amplitude.ts.
+      No inicializar Amplitude nuevamente aquí: evita dos instancias/proyectos,
+      IDs de dispositivo/sesión divergentes y eventos de autocapture no gobernados.
+    -->
   </head>
   <body>
     <div id="root"></div>
