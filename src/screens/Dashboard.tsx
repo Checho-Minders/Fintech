@@ -31,7 +31,6 @@ export function DashboardScreen({
   // ─────────────────────────────────────────────
   // Activation: track dashboard viewed (once)
   // ─────────────────────────────────────────────
-
   useEffect(() => {
     if (!hasTrackedMount.current) {
       trackActivationStarted();
@@ -83,6 +82,7 @@ export function DashboardScreen({
         <section className="col-span-1 lg:col-span-2 p-8 flex flex-col justify-between bg-gradient-to-br from-brand-orange/10 via-brand-sidebar to-brand-bg border border-brand-border rounded-[20px]">
 
           <div>
+
             <div className="flex items-center justify-between mb-2">
 
               <label className="text-[12px] font-medium text-brand-gray uppercase tracking-widest">
@@ -123,6 +123,7 @@ export function DashboardScreen({
             <p className="text-sm text-brand-gray mt-2">
               Saldo disponible en dólares
             </p>
+
           </div>
 
           <div className="mt-8 flex gap-3">
@@ -178,7 +179,9 @@ export function DashboardScreen({
             </div>
 
             <div className="w-full bg-brand-border h-1.5 rounded-full overflow-hidden mt-4">
+
               <div className="h-full bg-gradient-to-r from-brand-orange to-orange-400 w-[75%]" />
+
             </div>
 
             <p className="text-[11px] text-brand-gray mt-4 leading-relaxed">
@@ -390,6 +393,7 @@ export function DashboardScreen({
                 </div>
 
                 <div className="ml-3">
+
                   <p className="text-sm font-medium text-white">
                     Ahorro Alquiler
                   </p>
@@ -397,6 +401,7 @@ export function DashboardScreen({
                   <p className="text-[11px] text-brand-gray">
                     Meta: {formatUSD(850)}
                   </p>
+
                 </div>
 
               </div>
@@ -421,6 +426,7 @@ export function DashboardScreen({
                 </div>
 
                 <div className="ml-3">
+
                   <p className="text-sm font-medium text-white">
                     Viaje Japón
                   </p>
@@ -428,6 +434,7 @@ export function DashboardScreen({
                   <p className="text-[11px] text-brand-gray">
                     Meta: {formatUSD(2000)}
                   </p>
+
                 </div>
 
               </div>
