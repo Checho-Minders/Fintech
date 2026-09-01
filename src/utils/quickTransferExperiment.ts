@@ -12,7 +12,7 @@ const AMPLITUDE_DEPLOYMENT_KEY =
 // Debe coincidir EXACTAMENTE con el Feature Flag Key
 // creado dentro de Amplitude Experiment.
 export const QUICK_TRANSFER_FLAG_KEY =
-  'minders-pay-transfer-cta-experiment2';
+  'feature_quick-transfer';
 
 export type QuickTransferPayload = {
   enabled: boolean;
